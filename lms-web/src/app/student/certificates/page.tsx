@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server"
-import { Award, BookOpen, Calendar, ExternalLink } from "lucide-react"
+import Link from "next/link"
+import { Award, Calendar, Download } from "lucide-react"
 
 export default async function CertificatesPage() {
     const supabase = await createClient()
@@ -54,10 +55,15 @@ export default async function CertificatesPage() {
                                     <p className="text-xs text-slate-400">Certificate ID</p>
                                     <p className="text-xs font-mono text-slate-600 mt-0.5">{cert.unique_code.slice(0, 16).toUpperCase()}...</p>
                                 </div>
-                                <button className="flex items-center gap-2 text-sm font-medium text-amber-700 hover:text-amber-900 transition">
-                                    <ExternalLink size={15} />
-                                    Download
-                                </button>
+                                <a
+                                    href={`/api/certificate?id=${cert.id}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 text-sm font-medium text-amber-700 hover:text-amber-900 transition"
+                                >
+                                    <Download size={15} />
+                                    Download PDF
+                                </a>
                             </div>
                         </div>
                     ))}
