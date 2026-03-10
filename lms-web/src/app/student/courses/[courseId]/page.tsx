@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { BookOpen, CheckSquare, ChevronRight, PlayCircle, FileText, Award } from "lucide-react"
+import EnrollButton from "@/components/EnrollButton"
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ courseId: string }> }) {
     const { courseId } = await params
@@ -26,6 +27,19 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
 
     const sections = (course.course_sections || []).sort((a: any, b: any) => a.order_index - b.order_index)
     const totalLessons = sections.reduce((acc: number, s: any) => acc + (s.lessons?.length || 0), 0)
+
+    // Check if current user is enrolled
+    const { data: { user } } = await supabase.auth.getUser()
+    let isEnrolled = false
+    if (user) {
+        const { data: enrollment } = await supabase
+            .from('enrollments')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('course_id', courseId)
+            .single()
+        isEnrolled = !!enrollment
+    }
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
@@ -96,9 +110,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
                             )}
                         </div>
 
-                        <button className="w-full py-3 bg-violet-600 text-white font-semibold rounded-xl hover:bg-violet-700 transition shadow-sm">
-                            Enroll Now
-                        </button>
+                        <EnrollButton
+                            courseId={courseId}
+                            price={course.price}
+                            isFree={course.is_free}
+                            isEnrolled={isEnrolled}
+                        />
 
                         <div className="space-y-2.5 text-sm text-slate-600 pt-2 border-t">
                             <p className="flex items-center gap-2"><CheckSquare size={16} className="text-emerald-500" /> {totalLessons} on-demand lessons</p>
