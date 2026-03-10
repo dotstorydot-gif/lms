@@ -19,7 +19,10 @@ export default function NewTenantPage() {
             </div>
 
             <div className="bg-white p-8 rounded-2xl border shadow-sm">
-                <form action={createTenant} className="space-y-6">
+                <form action={async (formData) => {
+                    'use server'
+                    await createTenant(formData)
+                }} className="space-y-6">
 
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">

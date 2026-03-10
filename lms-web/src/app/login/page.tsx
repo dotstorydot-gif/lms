@@ -12,7 +12,10 @@ export default function LoginPage() {
                         Access the LMS Platform
                     </p>
                 </div>
-                <form className="mt-8 space-y-6" action={login}>
+                <form className="mt-8 space-y-6" action={async (formData) => {
+                    'use server'
+                    await login(formData)
+                }}>
                     <div className="rounded-md shadow-sm -space-y-px">
                         <div>
                             <label htmlFor="email-address" className="sr-only">
