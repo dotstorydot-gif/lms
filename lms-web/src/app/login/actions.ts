@@ -3,6 +3,17 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 
+// Maps a role to the correct portal path
+function roleToPath(role: string): string {
+    switch (role) {
+        case 'super_admin': return '/super-admin'
+        case 'tenant_admin': return '/admin'
+        case 'instructor': return '/instructor'
+        case 'student':
+        default: return '/student'
+    }
+}
+
 export async function login(formData: FormData) {
     const supabase = await createClient()
 
@@ -13,17 +24,22 @@ export async function login(formData: FormData) {
         return { error: 'Email and password are required' }
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-    })
+    const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
         return { error: error.message }
     }
 
-    // After successful login, redirect to super admin. 
-    // In a robust multi-tenant system, you'd check roles here and redirect to the specific tenant dashboard if they are just an instructor. 
-    // For Phase 2, we assume they are logging in from the global domain.
-    redirect('/super-admin')
+    // Look up the user's highest-privilege role from user_tenant_roles
+    const { data: roleRecord } = await supabase
+        .from('user_tenant_roles')
+        .select('role')
+        .eq('user_id', authData.user.id)
+        .eq('is_active', true)
+        .order('role') // super_admin sorts before tenant_admin > instructor > student
+        .limit(1)
+        .single()
+
+    const role = roleRecord?.role || 'student'
+    redirect(roleToPath(role))
 }
