@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server"
 import Link from "next/link"
-import { Plus, MoreVertical, Edit, Eye, Trash2 } from "lucide-react"
+import { Plus, MoreVertical, Edit, Eye, Trash2, BookOpen } from "lucide-react"
 
 export default async function InstructorCoursesPage() {
     const supabase = await createClient()
